@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "ssja.jwt.secret-key",
+      "type": "java.lang.String",
+      "description": "Description for ssja.jwt.secret-key."
+    },
+    {
+      "name": "ssja.jwt.expires-in",
+      "type": "java.lang.String",
+      "description": "Description for ssja.jwt.expires-in."
+    }
+  ] }
