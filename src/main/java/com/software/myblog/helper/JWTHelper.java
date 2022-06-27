@@ -45,7 +45,7 @@ public class JWTHelper {
     private String secretKey;
 
     @Value("${blog.jwt.expires-in:}")
-    private String expiresIn;
+    private long expiresIn;
 
 
     public String generate(String username) {
@@ -58,6 +58,7 @@ public class JWTHelper {
         return JWT.create()
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(Date.from(Instant.now()).getTime() + expiresIn))
+                .withClaim("username", username)
                 .sign(Algorithm.HMAC512(secretKey));
     }
 

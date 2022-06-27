@@ -7,7 +7,6 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -34,25 +33,29 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws
             ServletException, IOException {
 
-        // token req aldığım yer
-        String token = getJWTTokenFromRequest(request);
-        if(!(StringUtils.hasLength(token)) && helper.validate(token)){
-            String username = helper.findUsername(token);
-            UserDetails userDetails = userDetailService.loadUserByUsername(username);
-            //Username - pass auth token oluş
-            UsernamePasswordAuthenticationToken authenticationToken = new
-                    UsernamePasswordAuthenticationToken(userDetails, null,
-                    userDetails.getAuthorities());
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            // auth context ekliyorum bu kullanıcı authenticate olmustur demek
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        try {
+            // token req aldığım yer
+            String token = getJWTTokenFromRequest(request);
+            if ((StringUtils.hasLength(token)) && helper.validate(token)) {
+                String username = helper.findUsername(token);
+                UserDetails userDetails = userDetailService.loadUserByUsername(username);
+                //Username - pass auth token oluş
+                UsernamePasswordAuthenticationToken authenticationToken = new
+                        UsernamePasswordAuthenticationToken(userDetails, null,
+                        userDetails.getAuthorities());
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // auth context ekliyorum bu kullanıcı authenticate olmustur demek
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+        } catch (Exception e) {
+            logger.error("Cannot set user authentication: {}", e);
         }
         filterChain.doFilter(request, response);
     }
 
-    private String getJWTTokenFromRequest(HttpServletRequest request){
+    private String getJWTTokenFromRequest(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
-        if(StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")){
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
         }
         return Strings.EMPTY;
